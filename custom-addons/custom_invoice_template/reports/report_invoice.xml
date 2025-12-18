@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="report_custom_invoice">
+            <t t-set="full_width" t-value="True"/>
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-set="lang" t-value="o.partner_id.lang or env.user.lang"/>
+                    <t t-set="o" t-value="o.with_context(lang=lang)"/>
+                    <t t-set="proforma" t-value="o._context.get('proforma', False)"/>
+                    <t t-set="print_with_payments" t-value="o._context.get('print_with_payments', False)"/>
+                    <t t-call="custom_invoice_template.report_invoice_document_custom_full"/>
+                </t>
+            </t>
+        </template>
+
+        <template id="report_invoice_document_custom_full">
+            <t t-set="proforma" t-value="o._context.get('proforma', False)"/>
+            <t t-set="print_with_payments" t-value="o._context.get('print_with_payments', False)"/>
+            <t t-set="forced_vat" t-value="o.fiscal_position_id.foreign_vat"/>
+            <div class="clearfix invoice_main">
+                <div class="page custom_invoice_main">
+                        <div class="d-none" name="layout_document_title">
+                            <t t-set="layout_document_title">
+                                <span t-if="not proforma"></span>
+                                <span t-else="">PROFORMA</span>
+                                <span t-if="o.move_type == 'out_invoice' and o.state == 'posted'">Invoice</span>
+                                <span t-elif="o.move_type == 'out_invoice' and o.state == 'draft'">Draft Invoice</span>
+                                <span t-elif="o.move_type == 'out_invoice' and o.state == 'cancel'">Cancelled Invoice</span>
+                                <span t-elif="o.move_type == 'out_refund' and o.state == 'posted'">Credit Note</span>
+                                <span t-elif="o.move_type == 'out_refund' and o.state == 'draft'">Draft Credit Note</span>
+                                <span t-elif="o.move_type == 'out_refund' and o.state == 'cancel'">Cancelled Credit Note</span>
+                                <span t-elif="o.move_type == 'in_refund'">Vendor Credit Note</span>
+                                <span t-elif="o.move_type == 'in_invoice'">Vendor Bill</span>
+                                <span t-if="o.name and o.name != '/'" t-field="o.name"/>
+                            </t>
+                        </div>
+                        <style>
+                            .custom_invoice_main { font-size: 11px; color: #111; font-family: DejaVu Sans, sans-serif; line-height: 1.35; }
+                            .custom_invoice_main .inv-outer { border: 1px solid #444; }
+                            .custom_invoice_main .inv-section { border-bottom: 1px solid #444; }
+                            .custom_invoice_main .inv-pad { padding: 6px 8px; }
+                            .custom_invoice_main .tax-title { font-size: 11px; font-weight: 600; letter-spacing: 0.8px; }
+                            .custom_invoice_main .tax-title-top { text-align: center; margin-bottom: 6px; }
+                            .custom_invoice_main .company-name { font-size: 11px; font-weight: 700; }
+                            .custom_invoice_main .company-details { font-size: 11px; line-height: 1.4; }
+                            .custom_invoice_main .section-title { font-weight: 600; font-size: 11px; }
+                            .custom_invoice_main table { width: 100%; border-collapse: collapse; }
+                            .custom_invoice_main address { font-style: normal; margin: 0; }
+                            .custom_invoice_main .invoice-table th,
+                            .custom_invoice_main .invoice-table td { border: 1px solid #444; padding: 6px; vertical-align: top; }
+                            .custom_invoice_main .invoice-table th { background: #fff; font-weight: 600; font-size: 11px; }
+                            .custom_invoice_main .invoice-table tr > *:first-child { border-left: 0; }
+                            .custom_invoice_main .invoice-table tr > *:last-child { border-right: 0; }
+                            .custom_invoice_main .invoice-table thead tr:first-child th { border-top: 0; }
+                            .custom_invoice_main .totals-table td { padding: 6px 8px; border: 1px solid #444; }
+                            .custom_invoice_main .totals-table tr:nth-child(odd) { background: #fafafa; }
+                            .custom_invoice_main .totals-table .label { font-weight: 600; width: 60%; }
+                            .custom_invoice_main .info-box { border: 1px solid #444; padding: 8px 10px; }
+                            .custom_invoice_main .info-box div { margin-bottom: 4px; }
+                            .custom_invoice_main .info-box strong { text-transform: uppercase; font-size: 11px; }
+                            .custom_invoice_main .signature-row { margin-top: 20px; margin-left: 0; margin-right: 0; padding-left: 8px; padding-right: 8px; }
+                            .custom_invoice_main .sig-gap { height: 26px; }
+                            .custom_invoice_main .amount-words { border: 1px solid #444; padding: 6px 8px; margin-top: 8px; font-weight: 600; }
+                            .custom_invoice_main .meta-table td { padding: 2px 0; }
+                            .custom_invoice_main .inv-page-no { text-align: right; font-size: 10px; margin-top: 4px; }
+                            .custom_invoice_main .avoid-page-break-inside { page-break-inside: avoid; }
+                        </style>
+                        <div class="tax-title tax-title-top">TAX INVOICE</div>
+                        <div class="inv-outer">
+                            <div class="inv-section inv-pad">
+                                <table>
+                                    <tr>
+                                        <td style="width:35%;"></td>
+                                        <td style="width:65%; vertical-align: top;">
+                                            <div class="company-details">
+                                                <div class="company-name" t-field="o.company_id.name"/>
+                                                <div>
+                                                    <span t-field="o.company_id.street"/> <span t-field="o.company_id.street2"/>
+                                                    <t t-if="o.company_id.city"> <span t-field="o.company_id.city"/></t>
+                                                    <t t-if="o.company_id.state_id"> <span t-field="o.company_id.state_id.name"/></t>
+                                                    <t t-if="o.company_id.country_id"> - <span t-field="o.company_id.country_id.name"/></t>
+                                                </div>
+                                                <div t-if="o.company_id.phone">Phone: <span t-field="o.company_id.phone"/></div>
+                                                <div>
+                                                    <span t-if="o.company_id.company_registry">PAN: <span t-field="o.company_id.company_registry"/></span>
+                                                    <t t-if="o.company_id.vat">
+                                                        <span t-if="o.company_id.company_registry"> &#160; </span>
+                                                        GSTIN: <span t-field="o.company_id.vat"/>
+                                                    </t>
+                                                </div>
+                                                <div t-if="o.company_id.website">Website: <span t-field="o.company_id.website"/></div>
+                                                <div t-if="o.company_id.email">Email: <span t-field="o.company_id.email"/></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="inv-section">
+                                <table>
+                                    <tr>
+                                        <td class="inv-pad" style="width:50%; vertical-align: top;">
+                                            <div class="section-title">Bill To:</div>
+                                            <address class="mb-1" t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'/>
+                                            <div t-if="o.partner_id.phone">Ph: <span t-field="o.partner_id.phone"/></div>
+                                            <div t-if="o.partner_id.vat">GSTIN: <span t-field="o.partner_id.vat"/></div>
+                                        </td>
+                                        <td class="inv-pad" style="width:50%; vertical-align: top; border-left: 1px solid #444;">
+                                            <div class="section-title">Ship To:</div>
+                                            <t t-if="o.partner_shipping_id">
+                                                <address class="mb-1" t-field="o.partner_shipping_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'/>
+                                                <div t-if="o.partner_shipping_id.phone">Ph: <span t-field="o.partner_shipping_id.phone"/></div>
+                                                <div t-if="o.partner_shipping_id.vat">GSTIN: <span t-field="o.partner_shipping_id.vat"/></div>
+                                            </t>
+                                            <t t-else="">
+                                                <address class="mb-1" t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'/>
+                                                <div t-if="o.partner_id.phone">Ph: <span t-field="o.partner_id.phone"/></div>
+                                                <div t-if="o.partner_id.vat">GSTIN: <span t-field="o.partner_id.vat"/></div>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="inv-section">
+                                <table>
+                                    <tr>
+                                        <td class="inv-pad" style="width:70%;">
+                                            <span class="section-title">Invoice Number:</span>
+                                            <span t-field="o.name"/>
+                                        </td>
+                                        <td class="inv-pad" style="width:30%; text-align: right; border-left: 1px solid #444;">
+                                            <span class="section-title">Invoice Date:</span>
+                                            <span t-field="o.invoice_date"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <t t-set="is_inr" t-value="o.currency_id and o.currency_id.name == 'INR'"/>
+                        <table name="invoice_line_table" class="o_main_table invoice-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:5%;">S.No</th>
+                                    <th style="width:35%;">Description</th>
+                                    <th style="width:8%;">Qty</th>
+                                    <th style="width:8%;">UoM</th>
+                                    <th style="width:12%;">Unit Rate</th>
+                                    <th style="width:10%;">GST %</th>
+                                    <th style="width:12%;">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-if="not o.invoice_line_ids.filtered(lambda l: l.display_type == 'product')">
+                                    <td colspan="7" class="text-center">No invoice lines.</td>
+                                </tr>
+                                <t t-foreach="o.invoice_line_ids.filtered(lambda l: l.display_type == 'product')" t-as="line" t-foreach-index="line_index">
+                                    <tr>
+                                        <t name="account_invoice_line_accountable">
+                                            <td class="text-center">
+                                                <span t-out="line_index + 1"/>
+                                            </td>
+                                            <td>
+                                                <div class="fw-bold" t-field="line.name" t-options="{'widget': 'text'}"/>
+                                                <div t-if="line.product_id.default_code">
+                                                    Product Code: <span t-field="line.product_id.default_code"/>
+                                                </div>
+                                                <t t-set="hsn_code" t-value="(line.product_id.l10n_in_hsn_code if 'l10n_in_hsn_code' in line.product_id._fields else (line.product_id.hs_code if 'hs_code' in line.product_id._fields else False))"/>
+                                                <div t-if="hsn_code">
+                                                    HSN/SAC:
+                                                    <span t-out="hsn_code"/>
+                                                </div>
+                                                <div t-if="line.product_id.barcode">
+                                                    Serial/Barcode: <span t-field="line.product_id.barcode"/>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <span t-field="line.quantity"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <span t-field="line.product_uom_id"/>
+                                            </td>
+                                            <td class="text-end">
+                                                <t t-if="is_inr">
+                                                    <span>&#8377;&#160;</span>
+                                                    <span t-out="'{:,.2f}'.format(o.currency_id.round(line.price_unit))"/>
+                                                </t>
+                                                <t t-else="">
+                                                    <span t-out="line.price_unit" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                                </t>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-set="gst_values" t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.tax_ids])"/>
+                                                <span t-out="gst_values or '-'"/>
+                                            </td>
+                                            <td class="text-end">
+                                                <t t-if="is_inr">
+                                                    <span>&#8377;&#160;</span>
+                                                    <span t-out="'{:,.2f}'.format(o.currency_id.round(line.price_subtotal))"/>
+                                                </t>
+                                                <t t-else="">
+                                                    <span t-out="line.price_subtotal" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                                </t>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                </t>
+                                <t t-set="tax_totals" t-value="o.tax_totals or {}"/>
+                                <tr class="avoid-page-break-inside">
+                                    <td colspan="5"></td>
+                                    <td class="section-title">Sub Total</td>
+                                    <td class="text-end">
+                                        <t t-if="is_inr">
+                                            <span>&#8377;&#160;</span>
+                                            <span t-out="'{:,.2f}'.format(o.currency_id.round(o.amount_untaxed))"/>
+                                        </t>
+                                        <t t-else="">
+                                            <span t-out="o.amount_untaxed" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        </t>
+                                    </td>
+                                </tr>
+                                <t t-if="tax_totals and tax_totals.get('subtotals')">
+                                    <t t-foreach="tax_totals['subtotals']" t-as="subtotal">
+                                        <t t-foreach="subtotal['tax_groups']" t-as="tax_group">
+                                            <tr class="avoid-page-break-inside">
+                                                <td colspan="5"></td>
+                                                <td class="section-title"><span t-out="tax_group['group_name']"/></td>
+                                                <td class="text-end">
+                                                    <t t-if="is_inr">
+                                                        <span>&#8377;&#160;</span>
+                                                        <span t-out="'{:,.2f}'.format(o.currency_id.round(tax_group['tax_amount_currency']))"/>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span t-out="tax_group['tax_amount_currency']" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                                    </t>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </t>
+                                </t>
+                                <tr class="avoid-page-break-inside">
+                                    <td colspan="5"></td>
+                                    <td class="section-title">Total</td>
+                                    <td class="text-end fw-bold">
+                                        <t t-if="is_inr">
+                                            <span>&#8377;&#160;</span>
+                                            <span t-out="'{:,.2f}'.format(o.currency_id.round(o.amount_total))"/>
+                                        </t>
+                                        <t t-else="">
+                                            <span t-out="o.amount_total" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        </t>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="inv-section inv-pad">
+                            <t t-if="'amount_total_words' in o._fields">
+                                <span class="section-title">Total Amount in Words:</span> <span t-field="o.amount_total_words"/>
+                            </t>
+                        </div>
+                        <div class="inv-section">
+                            <t t-set="bank" t-value="o.partner_bank_id or o.company_id.partner_id.bank_ids[:1]"/>
+                            <table>
+                                <tr>
+                                    <td class="inv-pad" style="width:50%; vertical-align: top;">
+                                        <div>
+                                            <span class="section-title">Payment Terms:</span>
+                                            <span t-out="o.invoice_payment_term_id.note or o.invoice_payment_term_id.name or ''"/>
+                                        </div>
+                                        <div t-if="'transport_mode' in o.company_id._fields and o.company_id.transport_mode">
+                                            <span class="section-title">Mode of Transport:</span>
+                                            <span t-field="o.company_id.transport_mode"/>
+                                        </div>
+                                        <div t-if="o.invoice_origin">
+                                            <span class="section-title">Document Through:</span>
+                                            <span t-field="o.invoice_origin"/>
+                                        </div>
+                                    </td>
+                                    <td class="inv-pad" style="width:50%; vertical-align: top; border-left: 1px solid #444;">
+                                        <div t-if="bank">
+                                            <div><span class="section-title">Bank Name:</span> <span t-out="bank.bank_id.name or ''"/></div>
+                                            <div t-if="bank.bank_id.city"><span class="section-title">Branch:</span> <span t-out="bank.bank_id.city"/></div>
+                                            <div t-if="bank.bank_bic"><span class="section-title">IFSC:</span> <span t-out="bank.bank_bic"/></div>
+                                            <div t-if="bank.acc_number"><span class="section-title">A/c No:</span> <span t-out="bank.acc_number"/></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div id="payment_term" class="d-none"></div>
+                        <div id="qrcode_info" class="d-none"></div>
+                        <div id="payment_term_content" class="inv-section inv-pad">
+                            <div>
+                                We are registered as "SMALL" Enterprise (Reg No: 1234567890-). As per section 16 of the MSMED Act, 2006, delay in payment would entail compound interest, with monthly rests, at 3 times the bank as notified by RBI.
+                            </div>
+                            <div style="border-top: 1px solid #444; margin: 6px -8px;"></div>
+                            <div>
+                                All disputes are subject to Coimbatore Jurisdiction only. Our responsibility ceases immediately goods are delivered to the carrier. We are not responsible for damage, shortage or theft in transit. Certified that the particulars given above are true and correct and amount indicated represents the price actually charged and that there is no flow of additonal consideration directly or indirectly from the buyer.
+                            </div>
+                        </div>
+                        <div class="signature-row">
+                            <table>
+                                <tr>
+                                    <td style="width:50%; vertical-align: top; text-align: left;">
+                                        Receiver's Signature
+                                    </td>
+                                    <td style="width:50%; vertical-align: bottom; text-align: right;">
+                                        <div>For <span t-field="o.company_id.name"/></div>
+                                        <div class="sig-gap"></div>
+                                        <div>Authorised Signatory</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        </div>
+                </div>
+            </div>
+        </template>
+    </data>
+</odoo>
