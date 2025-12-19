@@ -36,20 +36,20 @@
                             </t>
                         </div>
                         <style>
-                            .custom_invoice_main { font-size: 11px; color: #111; font-family: DejaVu Sans, sans-serif; line-height: 1.35; }
+                            .custom_invoice_main { font-size: 14px; color: #111; line-height: 1.35; }
                             .custom_invoice_main .inv-outer { border: 1px solid #444; }
                             .custom_invoice_main .inv-section { border-bottom: 1px solid #444; }
                             .custom_invoice_main .inv-pad { padding: 6px 8px; }
-                            .custom_invoice_main .tax-title { font-size: 11px; font-weight: 600; letter-spacing: 0.8px; }
+                            .custom_invoice_main .tax-title { font-weight: 600; letter-spacing: 0.8px; }
                             .custom_invoice_main .tax-title-top { text-align: center; margin-bottom: 6px; }
-                            .custom_invoice_main .company-name { font-size: 11px; font-weight: 700; }
-                            .custom_invoice_main .company-details { font-size: 11px; line-height: 1.4; }
-                            .custom_invoice_main .section-title { font-weight: 600; font-size: 11px; }
+                            .custom_invoice_main .company-name { font-weight: 700; }
+                            .custom_invoice_main .company-details { line-height: 1.4; }
+                            .custom_invoice_main .section-title { font-weight: 600; }
                             .custom_invoice_main table { width: 100%; border-collapse: collapse; }
                             .custom_invoice_main address { font-style: normal; margin: 0; }
                             .custom_invoice_main .invoice-table th,
                             .custom_invoice_main .invoice-table td { border: 1px solid #444; padding: 6px; vertical-align: top; }
-                            .custom_invoice_main .invoice-table th { background: #fff; font-weight: 600; font-size: 11px; }
+                            .custom_invoice_main .invoice-table th { background: #fff; }
                             .custom_invoice_main .invoice-table tr > *:first-child { border-left: 0; }
                             .custom_invoice_main .invoice-table tr > *:last-child { border-right: 0; }
                             .custom_invoice_main .invoice-table thead tr:first-child th { border-top: 0; }
@@ -58,12 +58,12 @@
                             .custom_invoice_main .totals-table .label { font-weight: 600; width: 60%; }
                             .custom_invoice_main .info-box { border: 1px solid #444; padding: 8px 10px; }
                             .custom_invoice_main .info-box div { margin-bottom: 4px; }
-                            .custom_invoice_main .info-box strong { text-transform: uppercase; font-size: 11px; }
+                            .custom_invoice_main .info-box strong { text-transform: uppercase; }
                             .custom_invoice_main .signature-row { margin-top: 20px; margin-left: 0; margin-right: 0; padding-left: 8px; padding-right: 8px; }
                             .custom_invoice_main .sig-gap { height: 26px; }
                             .custom_invoice_main .amount-words { border: 1px solid #444; padding: 6px 8px; margin-top: 8px; font-weight: 600; }
                             .custom_invoice_main .meta-table td { padding: 2px 0; }
-                            .custom_invoice_main .inv-page-no { text-align: right; font-size: 10px; margin-top: 4px; }
+                            .custom_invoice_main .inv-page-no { text-align: right; margin-top: 4px; }
                             .custom_invoice_main .avoid-page-break-inside { page-break-inside: avoid; }
                         </style>
                         <div class="tax-title tax-title-top">TAX INVOICE</div>
@@ -161,15 +161,15 @@
                                             <td>
                                                 <div class="fw-bold" t-field="line.name" t-options="{'widget': 'text'}"/>
                                                 <div t-if="line.product_id.default_code">
-                                                    Product Code: <span t-field="line.product_id.default_code"/>
+                                                    <span class="section-title">Product Code: </span> <span t-field="line.product_id.default_code"/>
                                                 </div>
                                                 <t t-set="hsn_code" t-value="(line.product_id.l10n_in_hsn_code if 'l10n_in_hsn_code' in line.product_id._fields else (line.product_id.hs_code if 'hs_code' in line.product_id._fields else False))"/>
                                                 <div t-if="hsn_code">
-                                                    HSN/SAC:
+                                                    <span class="section-title">HSN/SAC: </span>
                                                     <span t-out="hsn_code"/>
                                                 </div>
                                                 <div t-if="line.product_id.barcode">
-                                                    Serial/Barcode: <span t-field="line.product_id.barcode"/>
+                                                    <span class="section-title"> Serial/Barcode: </span><span t-field="line.product_id.barcode"/>
                                                 </div>
                                             </td>
                                             <td class="text-center">
@@ -206,7 +206,7 @@
                                 <t t-set="tax_totals" t-value="o.tax_totals or {}"/>
                                 <tr class="avoid-page-break-inside">
                                     <td colspan="5"></td>
-                                    <td class="section-title">Sub Total</td>
+                                    <td>Sub Total</td>
                                     <td class="text-end">
                                         <t t-if="is_inr">
                                             <span>&#8377;&#160;</span>
@@ -222,7 +222,7 @@
                                         <t t-foreach="subtotal['tax_groups']" t-as="tax_group">
                                             <tr class="avoid-page-break-inside">
                                                 <td colspan="5"></td>
-                                                <td class="section-title"><span t-out="tax_group['group_name']"/></td>
+                                                <td><span t-out="tax_group['group_name']"/></td>
                                                 <td class="text-end">
                                                     <t t-if="is_inr">
                                                         <span>&#8377;&#160;</span>

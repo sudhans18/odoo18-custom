@@ -8,13 +8,13 @@
             <field name="page_height">0</field>
             <field name="page_width">0</field>
             <field name="orientation">Portrait</field>
-            <field name="margin_top">10</field>
-            <field name="margin_bottom">10</field>
-            <field name="margin_left">10</field>
-            <field name="margin_right">10</field>
+            <field name="margin_top">4</field>
+            <field name="margin_bottom">34</field>
+            <field name="margin_left">3</field>
+            <field name="margin_right">3</field>
             <field name="header_line" eval="False"/>
-            <field name="header_spacing">0</field>
-            <field name="dpi">90</field>
+            <field name="header_spacing">74</field>
+            <field name="dpi">110</field>
             <field name="css_margins" eval="True"/>
             <field name="disable_shrinking" eval="True"/>
         </record>
