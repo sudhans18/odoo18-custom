@@ -36,7 +36,8 @@
                             </t>
                         </div>
                         <style>
-                            .custom_invoice_main { font-size: 14px; color: #111; line-height: 1.35; }
+                            .custom_invoice_main { font-size: 14px !important; color: #111; line-height: 1.35; font-family: DejaVu Sans, sans-serif !important; }
+                            .custom_invoice_main * { font-size: 14px !important; font-family: DejaVu Sans, sans-serif !important; }
                             .custom_invoice_main .inv-outer { border: 1px solid #444; }
                             .custom_invoice_main .inv-section { border-bottom: 1px solid #444; }
                             .custom_invoice_main .inv-pad { padding: 6px 8px; }
@@ -47,11 +48,8 @@
                             .custom_invoice_main .section-title { font-weight: 600; }
                             .custom_invoice_main table { width: 100%; border-collapse: collapse; }
                             .custom_invoice_main address { font-style: normal; margin: 0; }
-                            .custom_invoice_main .invoice-table th,
-                            .custom_invoice_main .invoice-table td { border: 1px solid #444; padding: 6px; vertical-align: top; }
-                            .custom_invoice_main .invoice-table th { background: #fff; }
-                            .custom_invoice_main .invoice-table tr > *:first-child { border-left: 0; }
-                            .custom_invoice_main .invoice-table tr > *:last-child { border-right: 0; }
+                            .custom_invoice_main .invoice-table td { border: 0; padding: 6px; vertical-align: top; }
+                            .custom_invoice_main .invoice-table th { border: 1px solid #444; padding: 6px; vertical-align: top; background: #fff; }
                             .custom_invoice_main .invoice-table thead tr:first-child th { border-top: 0; }
                             .custom_invoice_main .totals-table td { padding: 6px 8px; border: 1px solid #444; }
                             .custom_invoice_main .totals-table tr:nth-child(odd) { background: #fafafa; }
@@ -61,6 +59,7 @@
                             .custom_invoice_main .info-box strong { text-transform: uppercase; }
                             .custom_invoice_main .signature-row { margin-top: 20px; margin-left: 0; margin-right: 0; padding-left: 8px; padding-right: 8px; }
                             .custom_invoice_main .sig-gap { height: 26px; }
+                            .custom_invoice_main .sig-gap-bottom { height: 26px; }
                             .custom_invoice_main .amount-words { border: 1px solid #444; padding: 6px 8px; margin-top: 8px; font-weight: 600; }
                             .custom_invoice_main .meta-table td { padding: 2px 0; }
                             .custom_invoice_main .inv-page-no { text-align: right; margin-top: 4px; }
@@ -71,8 +70,12 @@
                             <div class="inv-section inv-pad">
                                 <table>
                                     <tr>
-                                        <td style="width:35%;"></td>
-                                        <td style="width:65%; vertical-align: top;">
+                                        <td style="width:30%; vertical-align: top;">
+                                            <t t-if="o.company_id.logo">
+                                                <img t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 70px; max-width: 100%;"/>
+                                            </t>
+                                        </td>
+                                        <td style="width:70%; vertical-align: top; text-align: left;">
                                             <div class="company-details">
                                                 <div class="company-name" t-field="o.company_id.name"/>
                                                 <div>
@@ -180,7 +183,7 @@
                                             </td>
                                             <td class="text-end">
                                                 <t t-if="is_inr">
-                                                    <span>&#8377;&#160;</span>
+                                                    <span t-raw="'&amp;#8377;&amp;nbsp;'" ></span>
                                                     <span t-out="'{:,.2f}'.format(o.currency_id.round(line.price_unit))"/>
                                                 </t>
                                                 <t t-else="">
@@ -193,7 +196,7 @@
                                             </td>
                                             <td class="text-end">
                                                 <t t-if="is_inr">
-                                                    <span>&#8377;&#160;</span>
+                                                    <span t-raw="'&amp;#8377;&amp;nbsp;'" ></span>
                                                     <span t-out="'{:,.2f}'.format(o.currency_id.round(line.price_subtotal))"/>
                                                 </t>
                                                 <t t-else="">
@@ -209,7 +212,7 @@
                                     <td>Sub Total</td>
                                     <td class="text-end">
                                         <t t-if="is_inr">
-                                            <span>&#8377;&#160;</span>
+                                            <span t-raw="'&amp;#8377;&amp;nbsp;'" ></span>
                                             <span t-out="'{:,.2f}'.format(o.currency_id.round(o.amount_untaxed))"/>
                                         </t>
                                         <t t-else="">
@@ -225,7 +228,7 @@
                                                 <td><span t-out="tax_group['group_name']"/></td>
                                                 <td class="text-end">
                                                     <t t-if="is_inr">
-                                                        <span>&#8377;&#160;</span>
+                                                        <span t-raw="'&amp;#8377;&amp;nbsp;'" ></span>
                                                         <span t-out="'{:,.2f}'.format(o.currency_id.round(tax_group['tax_amount_currency']))"/>
                                                     </t>
                                                     <t t-else="">
@@ -241,7 +244,7 @@
                                     <td class="section-title">Total</td>
                                     <td class="text-end fw-bold">
                                         <t t-if="is_inr">
-                                            <span>&#8377;&#160;</span>
+                                            <span t-raw="'&amp;#8377;&amp;nbsp;'" ></span>
                                             <span t-out="'{:,.2f}'.format(o.currency_id.round(o.amount_total))"/>
                                         </t>
                                         <t t-else="">
@@ -253,6 +256,7 @@
                         </table>
                         <div class="inv-section inv-pad">
                             <t t-if="'amount_total_words' in o._fields">
+                                <div style="border-top: 1px solid #444; margin: 6px -8px;"/>
                                 <span class="section-title">Total Amount in Words:</span> <span t-field="o.amount_total_words"/>
                             </t>
                         </div>
@@ -306,6 +310,7 @@
                                         <div>For <span t-field="o.company_id.name"/></div>
                                         <div class="sig-gap"></div>
                                         <div>Authorised Signatory</div>
+                                        <div class="sig-gap-bottom"></div>
                                     </td>
                                 </tr>
                             </table>
