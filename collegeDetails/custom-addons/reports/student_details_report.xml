@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Student Details PDF Report -->
+        <record id="paperformat_student_details" model="report.paperformat">
+            <field name="name">Student Details A4</field>
+            <field name="default" eval="True"/>
+            <field name="format">A4</field>
+            <field name="margin_top">40</field>
+            <field name="margin_bottom">40</field>
+            <field name="margin_left">20</field>
+            <field name="margin_right">20</field>
+            <field name="header_line" eval="False"/>
+            <field name="header_spacing">35</field>
+            <field name="dpi">90</field>
+        </record>
+
+        <record id="action_report_student_details" model="ir.actions.report">
+            <field name="name">Student Details PDF</field>
+            <field name="model">student.details</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">college-details.student_details_report</field>
+            <field name="report_file">student_details_report</field>
+            <field name="binding_model_id" ref="model_student_details"/>
+            <field name="binding_type">report</field>
+            <field name="paperformat_id" ref="college-details.paperformat_student_details"/>
+        </record>
+
+        <template id="student_details_report">
+            <t t-call="web.internal_layout">
+                <div class="page">
+                    <main>
+                    <style>
+                        .header {
+                            text-align: center;
+                            margin-bottom: 30px;
+                        }
+                        .header h2 {
+                            color: #2c3e50;
+                            margin-bottom: 10px;
+                        }
+                        .student-info {
+                            margin-bottom: 20px;
+                        }
+                        .info-row {
+                            margin-bottom: 10px;
+                        }
+                        .info-label {
+                            font-weight: bold;
+                            color: #34495e;
+                            display: inline-block;
+                            width: 150px;
+                        }
+                        .info-value {
+                            color: #2c3e50;
+                        }
+                        .section-title {
+                            font-weight: bold;
+                            color: #2c3e50;
+                            margin-top: 20px;
+                            margin-bottom: 10px;
+                            border-bottom: 1px solid #bdc3c7;
+                            padding-bottom: 5px;
+                        }
+                    </style>
+                    
+                    <div class="header">
+                        <h2>Student Details Report</h2>
+                        <p>Generated on: <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M:%S')"/></p>
+                    </div>
+
+                    <t t-foreach="docs" t-as="doc">
+                    <div class="student-info">
+                        <div class="section-title">Personal Information</div>
+                        <div class="info-row">
+                            <span class="info-label">Student Name:</span>
+                            <span class="info-value" t-esc="doc.name"/>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Email:</span>
+                            <span class="info-value" t-esc="doc.email or 'N/A'"/>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Phone:</span>
+                            <span class="info-value" t-esc="doc.phone or 'N/A'"/>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Gender:</span>
+                            <span class="info-value" t-esc="dict(doc._fields['gender'].selection).get(doc.gender, 'N/A')"/>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Date of Birth:</span>
+                            <span class="info-value" t-esc="doc.date_of_birth and doc.date_of_birth.strftime('%Y-%m-%d') or 'N/A'"/>
+                        </div>
+                    </div>
+
+                    <div class="academic-info">
+                        <div class="section-title">Academic Information</div>
+                        <div class="info-row">
+                            <span class="info-label">Course:</span>
+                            <span class="info-value" t-esc="doc.course"/>
+                        </div>
+                        <div class="info-row" t-if="doc.quotation_id">
+                            <span class="info-label">Quotation:</span>
+                            <span class="info-value" t-esc="doc.quotation_id.name"/>
+                        </div>
+                    </div>
+
+                    <div class="contact-info" t-if="doc.address">
+                        <div class="section-title">Address</div>
+                        <div class="info-row">
+                            <span class="info-value" t-esc="doc.address"/>
+                        </div>
+                    </div>
+
+                    <div class="notes" t-if="doc.notes">
+                        <div class="section-title">Additional Notes</div>
+                        <div class="info-row">
+                            <span class="info-value" t-esc="doc.notes"/>
+                        </div>
+                    </div>
+                    </t>
+                    </main>
+                </div>
+            </t>
+        </template>
+    </data>
+</odoo>
