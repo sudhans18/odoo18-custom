@@ -56,8 +56,8 @@
       <field name="view_id" ref="student_details_list"/>
     </record>
 
-    <!-- Menu Item for Student Details -->
-    <menuitem name="College Details" id="college_details_menu_root"/>
-    <menuitem name="Student Details" id="student_details_menu" parent="college_details_menu_root" action="student_details_action"/>
+    <!-- College Details App Menu Structure -->
+    <menuitem name="College Details" id="college_details_menu_root" sequence="10" web_icon="college-details,static/description/icon.png"/>
+    <menuitem name="Students" id="student_details_menu" parent="college_details_menu_root" action="student_details_action" sequence="10"/>
   </data>
 </odoo>
